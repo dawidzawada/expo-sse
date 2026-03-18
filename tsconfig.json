@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/expo-sse" },
+    { "path": "apps/server" },
+    { "path": "apps/example" }
+  ]
+}
