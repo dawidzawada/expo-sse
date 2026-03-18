@@ -47,7 +47,7 @@ export function parseSSEBuffer(
           nextLineStart = i + 1;
         }
       } else {
-        // \r at end of buffer — ambiguous, keep in remaining
+        // CR at end of buffer — ambiguous, keep in remaining
         break;
       }
     } else {
