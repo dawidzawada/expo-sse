@@ -118,13 +118,9 @@ export async function fetchSSE(
         throw error;
       }
 
-      let delayMs: number | undefined;
-      try {
-        const result = await onError(error as Error);
-        delayMs = typeof result === 'number' ? result : undefined;
-      } catch (fatalError) {
-        throw fatalError;
-      }
+      const result = await onError(error as Error);
+      let delayMs: number | undefined =
+        typeof result === 'number' ? result : undefined;
 
       if (delayMs === undefined) {
         const baseDelay = serverRetryMs ?? DEFAULT_RETRY_MS;
