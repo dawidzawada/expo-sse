@@ -1,5 +1,12 @@
 
 
+# [1.1.0](https://github.com/dawidzawada/expo-sse/compare/v1.0.0...v1.1.0) (2026-03-19)
+
+
+### Features
+
+* implement onAbort, secure abort behaviour, update tests and example ([d021178](https://github.com/dawidzawada/expo-sse/commit/d021178c1548c8e88013b03614c0f11494a2e2b0))
+
 # 1.0.0 (2026-03-19)
 
 
