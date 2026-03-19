@@ -1,6 +1,6 @@
 {
   "name": "@dawidzawada/expo-sse",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Fetch-like Server-Sent Events (SSE) client for Expo Apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,7 +36,9 @@
     },
     "npm": {
       "publish": true,
-      "versionArgs": ["--workspaces=false"]
+      "versionArgs": [
+        "--workspaces=false"
+      ]
     },
     "github": {
       "release": true
