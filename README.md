@@ -85,7 +85,7 @@ await parseSSEStream(response.body, {
 
 ### `parseSSEBuffer(buffer, lastEventId?)`
 
-Pure function that parses a string buffer into SSE events. Handles `\n`, `\r\n`, and `\r` line endings simultaneously.
+Pure function that parses a string buffer into SSE events. Handles LF (`\n`), CRLF (`\r\n`), and CR (`\r`) line endings simultaneously.
 
 ```ts
 import { parseSSEBuffer } from '@dawidzawada/expo-sse';
