@@ -32,7 +32,8 @@
       "tagName": "v${version}"
     },
     "npm": {
-      "publish": true
+      "publish": true,
+      "versionArgs": ["--workspaces=false"]
     },
     "github": {
       "release": true
