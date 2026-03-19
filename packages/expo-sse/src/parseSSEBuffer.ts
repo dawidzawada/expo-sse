@@ -3,6 +3,18 @@ import type { SSEParseResult } from './types';
 const LF = '\n';
 const CR = '\r';
 
+/**
+ * Parses a string buffer into SSE events per the WHATWG EventSource spec.
+ *
+ * Handles LF, CRLF, and CR line endings simultaneously (mixed endings supported).
+ * A trailing CR is kept in `remaining` because it may be the start of a CRLF pair
+ * split across chunks. Incomplete lines (no trailing newline) are also returned in
+ * `remaining` for the caller to prepend to the next chunk.
+ *
+ * @param buffer - Raw string to parse (may contain partial events).
+ * @param lastEventId - Carry-over `lastEventId` from a previous parse call.
+ * @returns Parsed events, unconsumed `remaining` text, and optional `retry`/`lastEventId`.
+ */
 export function parseSSEBuffer(
   buffer: string,
   lastEventId?: string
@@ -20,15 +32,12 @@ export function parseSSEBuffer(
   let i = 0;
 
   while (i <= len) {
-    // Find end of line
     let lineEnd = -1;
     let nextLineStart = -1;
 
     if (i === len) {
-      // End of buffer — only process if there's content since last line start
-      if (lineStart === len) break;
-      // Check if we have an unterminated line (no trailing newline)
-      // This stays in remaining — don't process it
+      // Any content after the last line terminator is an incomplete line.
+      // Leave it in `remaining` so the next chunk can complete it.
       break;
     }
 
@@ -47,7 +56,9 @@ export function parseSSEBuffer(
           nextLineStart = i + 1;
         }
       } else {
-        // CR at end of buffer — ambiguous, keep in remaining
+        // A trailing CR could be a standalone CR line ending or the first
+        // byte of a CRLF pair split across chunks. Keep it in `remaining`
+        // until the next chunk arrives to disambiguate.
         break;
       }
     } else {
@@ -59,7 +70,8 @@ export function parseSSEBuffer(
     lineStart = nextLineStart;
     i = nextLineStart;
 
-    // Blank line — dispatch event if we have data
+    // Per SSE spec: a blank line marks the end of an event block.
+    // If any `data:` fields were seen, dispatch the event, otherwise discard.
     if (line === '') {
       if (hasData) {
         events.push({
@@ -68,7 +80,7 @@ export function parseSSEBuffer(
           lastEventId: currentEventId,
         });
       }
-      // Reset per-event state
+
       eventType = '';
       dataLines = [];
       hasData = false;
@@ -76,22 +88,22 @@ export function parseSSEBuffer(
       continue;
     }
 
-    // Comment line
+    // Comments (ping / heartbeat)
     if (line[0] === ':') {
       continue;
     }
 
-    // Parse field
     const colonIdx = line.indexOf(':');
     let field: string;
     let value: string;
 
     if (colonIdx === -1) {
       field = line;
-      value = '';
+      value = ''; // no colon = empty string value
     } else {
       field = line.slice(0, colonIdx);
-      // Strip single leading space after colon if present
+      // Per spec, strip only first space after the colon.
+      // Additional spaces are part of the value.
       value =
         colonIdx + 1 < line.length && line[colonIdx + 1] === ' '
           ? line.slice(colonIdx + 2)
@@ -107,19 +119,19 @@ export function parseSSEBuffer(
         eventType = value;
         break;
       case 'id':
-        // Ignore if value contains U+0000
+        // Per spec, ignore id fields containing U+0000 NULL.
         if (!value.includes('\0')) {
           currentEventId = value;
         }
         break;
       case 'retry': {
-        // Only accept if all characters are ASCII digits
+        // Per spec, retry is valid when the value is entirely ASCII digits.
         if (/^\d+$/.test(value)) {
           retry = parseInt(value, 10);
         }
         break;
       }
-      // Unknown fields are ignored per spec
+      // Per spec, silent ignore unrecognized field names (e.g. "foo:")
     }
   }
 

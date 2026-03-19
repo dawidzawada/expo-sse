@@ -22,6 +22,22 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
+/**
+ * Top-level SSE client using `expo/fetch` for streaming.
+ *
+ * Connects to `url`, parses the SSE stream via {@link parseSSEStream}, and
+ * auto-reconnects with exponential backoff + jitter (max 30s). The `headers`
+ * option accepts a sync value or an async function, re-evaluated on each
+ * attempt (useful for token refresh). Sends `Last-Event-ID` on reconnect.
+ *
+ * Reconnection behavior:
+ * - Server `retry:` field overrides the base delay.
+ * - `onError` can return a delay in ms (`0` for immediate) or throw to stop.
+ * - Errors during `onOpen` are fatal and skip reconnection.
+ *
+ * @param url - The SSE endpoint URL.
+ * @param options - Configuration including callbacks, headers, signal, and buffer size.
+ */
 export async function fetchSSE(
   url: string,
   options: FetchSSEOptions
@@ -43,7 +59,6 @@ export async function fetchSSE(
   while (true) {
     if (signal?.aborted) return;
 
-    // Build headers
     const baseInit =
       typeof headersOption === 'function'
         ? await headersOption()
@@ -90,12 +105,11 @@ export async function fetchSSE(
         });
       }
 
-      // Stream ended normally — server closed
       onClose?.();
     } catch (error) {
       if (signal?.aborted) return;
 
-      // onOpen errors are fatal — reject immediately, no onError, no reconnect
+      // onOpen error rejects immediately
       if (!openCompleted && !(error instanceof SSEHttpError)) {
         throw error;
       }
@@ -125,7 +139,6 @@ export async function fetchSSE(
       continue;
     }
 
-    // Stream closed normally, reconnect
     attempt++;
     const baseDelay = serverRetryMs ?? DEFAULT_RETRY_MS;
     const reconnectDelay =
