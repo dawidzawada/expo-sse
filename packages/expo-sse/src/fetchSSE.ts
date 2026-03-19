@@ -49,6 +49,7 @@ export async function fetchSSE(
     onMessage,
     onError,
     onClose,
+    onAbort,
     maxBufferSize,
   } = options;
 
@@ -57,7 +58,10 @@ export async function fetchSSE(
   let attempt = 0;
 
   while (true) {
-    if (signal?.aborted) return;
+    if (signal?.aborted) {
+      onAbort?.();
+      return;
+    }
 
     const baseInit =
       typeof headersOption === 'function'
@@ -101,15 +105,23 @@ export async function fetchSSE(
           onRetry: (retryMs) => {
             serverRetryMs = retryMs;
           },
+          signal,
           maxBufferSize,
         });
       }
 
+      if (signal?.aborted) {
+        onAbort?.();
+        return;
+      }
+
       onClose?.();
     } catch (error) {
-      if (signal?.aborted) return;
+      if (signal?.aborted) {
+        onAbort?.();
+        return;
+      }
 
-      // onOpen error rejects immediately
       if (!openCompleted && !(error instanceof SSEHttpError)) {
         throw error;
       }
@@ -131,7 +143,10 @@ export async function fetchSSE(
 
       attempt++;
       await delay(delayMs, signal);
-      if (signal?.aborted) return;
+      if (signal?.aborted) {
+        onAbort?.();
+        return;
+      }
       continue;
     }
 
@@ -141,6 +156,9 @@ export async function fetchSSE(
       Math.min(baseDelay * Math.pow(2, attempt), MAX_BACKOFF_MS) +
       Math.random() * JITTER_MAX_MS;
     await delay(reconnectDelay, signal);
-    if (signal?.aborted) return;
+    if (signal?.aborted) {
+      onAbort?.();
+      return;
+    }
   }
 }

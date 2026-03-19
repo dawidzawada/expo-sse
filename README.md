@@ -59,6 +59,7 @@ await fetchSSE('https://api.example.com/events', {
 | `onMessage`     | `(message: SSEMessage) => void`                                  | **Required.** Called for each SSE event.                                                                |
 | `onError`       | `(error: Error) => number \| void \| Promise<number \| void>`    | Called on errors. Return a delay in ms (`0` for immediate reconnect) or throw to stop.                  |
 | `onClose`       | `() => void`                                                     | Called when the stream closes normally.                                                                 |
+| `onAbort`       | `() => void`                                                     | Called when the connection is aborted via the signal.                                                   |
 | `maxBufferSize` | `number`                                                         | Max buffer size in bytes. Defaults to 512KB.                                                            |
 
 ### `parseSSEStream(stream, options)`
@@ -132,6 +133,26 @@ Thrown when the internal buffer exceeds `maxBufferSize`.
 | --------------- | -------- | ----------------------------- |
 | `bufferSize`    | `number` | Current buffer size in bytes. |
 | `maxBufferSize` | `number` | Configured limit in bytes.    |
+
+## Example: Connecting and disconnecting
+
+Use an `AbortController` to disconnect. The `onAbort` callback is called when the connection is stopped via the signal.
+
+```ts
+import { fetchSSE } from '@dawidzawada/expo-sse';
+
+const controller = new AbortController();
+
+fetchSSE('https://api.example.com/events', {
+  signal: controller.signal,
+  onMessage: (msg) => console.log(msg.event, msg.data),
+  onClose: () => console.log('stream closed by server'),
+  onAbort: () => console.log('disconnected by client'),
+});
+
+// Later: disconnect
+controller.abort();
+```
 
 ## Example: Token refresh
 

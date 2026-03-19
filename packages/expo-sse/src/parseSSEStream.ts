@@ -23,6 +23,7 @@ export async function parseSSEStream(
   const {
     onMessage,
     onRetry,
+    signal,
     maxBufferSize = DEFAULT_MAX_BUFFER_SIZE,
   } = options;
   const decoder = new TextDecoder('utf-8');
@@ -32,6 +33,8 @@ export async function parseSSEStream(
 
   try {
     while (true) {
+      if (signal?.aborted) break;
+
       const { done, value } = await reader.read();
       if (done) break;
 

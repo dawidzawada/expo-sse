@@ -350,6 +350,53 @@ describe('fetchSSE', () => {
     await promise;
   });
 
+  it('calls onAbort when signal is aborted', async () => {
+    const controller = new AbortController();
+    const onAbort = jest.fn();
+    setupStream([msg('hello')]);
+    mockFetch.mockResolvedValueOnce(mockResponse());
+    mockFetch.mockImplementation(pendingFetch);
+
+    const promise = fetchSSE(TEST_URL, {
+      signal: controller.signal,
+      onMessage: () => {},
+      onAbort,
+    });
+
+    await jest.advanceTimersByTimeAsync(0);
+    expect(onAbort).not.toHaveBeenCalled();
+
+    controller.abort();
+    await jest.advanceTimersByTimeAsync(0);
+
+    await promise;
+    expect(onAbort).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call onClose when aborted', async () => {
+    const controller = new AbortController();
+    const onClose = jest.fn();
+    const onAbort = jest.fn();
+
+    mockParseSSEStream.mockImplementationOnce(async () => {
+      controller.abort();
+    });
+    mockFetch.mockResolvedValueOnce(mockResponse());
+
+    const promise = fetchSSE(TEST_URL, {
+      signal: controller.signal,
+      onMessage: () => {},
+      onClose,
+      onAbort,
+    });
+
+    await jest.advanceTimersByTimeAsync(0);
+    await promise;
+
+    expect(onAbort).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('cycles through multiple reconnections correctly', async () => {
     const controller = new AbortController();
     const onOpen = jest.fn();

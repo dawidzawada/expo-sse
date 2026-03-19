@@ -63,6 +63,36 @@ describe('parseSSEStream', () => {
     expect(onRetry).toHaveBeenCalledWith(3000);
   });
 
+  it('stops reading when signal is aborted', async () => {
+    const controller = new AbortController();
+    const encoder = new TextEncoder();
+    let pullCount = 0;
+
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) {
+        pullCount++;
+        if (pullCount === 1) {
+          c.enqueue(encoder.encode('data: first\n\n'));
+        } else {
+          c.enqueue(encoder.encode('data: second\n\n'));
+        }
+      },
+    });
+
+    const messages: SSEMessage[] = [];
+    const promise = parseSSEStream(stream, {
+      onMessage: (msg) => {
+        messages.push(msg);
+        controller.abort();
+      },
+      signal: controller.signal,
+    });
+
+    await promise;
+    expect(messages).toHaveLength(1);
+    expect(messages[0].data).toBe('first');
+  });
+
   it('discards incomplete event at end of stream', async () => {
     const stream = createStream(['data: hello\n']);
     const messages: SSEMessage[] = [];

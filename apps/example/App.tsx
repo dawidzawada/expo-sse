@@ -65,8 +65,10 @@ export default function App() {
       onClose: () => {
         addLog('info', 'Stream closed, reconnecting...');
       },
-    }).then(() => {
-      setConnected(false);
+      onAbort: () => {
+        addLog('info', 'Disconnected');
+        setConnected(false);
+      },
     });
   }, [addLog]);
 
@@ -74,9 +76,7 @@ export default function App() {
     abortRef.current?.abort();
     abortRef.current = null;
     tokenRef.current = null;
-    setConnected(false);
-    addLog('info', 'Disconnected');
-  }, [addLog]);
+  }, []);
 
   useEffect(() => {
     return () => abortRef.current?.abort();

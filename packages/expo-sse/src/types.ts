@@ -14,6 +14,7 @@ export interface SSEParseResult {
 export interface ParseSSEStreamOptions {
   onMessage: (message: SSEMessage) => void;
   onRetry?: (retryMs: number) => void;
+  signal?: AbortSignal;
   maxBufferSize?: number;
 }
 
@@ -24,5 +25,6 @@ export interface FetchSSEOptions {
   onMessage: (message: SSEMessage) => void;
   onError?: (error: Error) => number | void | Promise<number | void>;
   onClose?: () => void;
+  onAbort?: () => void;
   maxBufferSize?: number;
 }
