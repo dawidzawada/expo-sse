@@ -1,7 +1,7 @@
 {
   "name": "@dawidzawada/expo-sse",
   "version": "0.1.0",
-  "description": "Server-Sent Events (SSE) client for Expo/React Native",
+  "description": "Fetch-like Server-Sent Events (SSE) client for Expo Apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
