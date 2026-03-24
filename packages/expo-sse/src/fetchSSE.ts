@@ -82,7 +82,7 @@ export async function fetchSSE(
       const response = await expoFetch(url, { headers, signal });
 
       if (!response.ok) {
-        throw new SSEHttpError(response.status, response);
+        throw await SSEHttpError.from(response);
       }
 
       if (onOpen) {

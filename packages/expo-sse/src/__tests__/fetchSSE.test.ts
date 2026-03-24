@@ -125,7 +125,8 @@ describe('fetchSSE', () => {
   });
 
   it('rejects with SSEHttpError on non-2xx response', async () => {
-    const response = mockResponse(500);
+    const responseBody = { code: 'Fatal error' };
+    const response = mockResponse(500, responseBody);
     mockFetch.mockResolvedValueOnce(response);
 
     const error = await fetchSSE(TEST_URL, {
@@ -138,7 +139,7 @@ describe('fetchSSE', () => {
     expect(error).toBeInstanceOf(SSEHttpError);
     const httpError = error as SSEHttpError;
     expect(httpError.status).toBe(500);
-    expect(httpError.response).toBe(response);
+    expect(httpError.response).toBe(responseBody);
   });
 
   it('reconnects with default backoff when onError returns undefined', async () => {

@@ -1,12 +1,17 @@
 export class SSEHttpError extends Error {
   readonly status: number;
-  readonly response: Response;
+  readonly response: unknown;
 
-  constructor(status: number, response: Response) {
+  constructor(status: number, response: unknown) {
     super(`HTTP ${status}`);
     this.name = 'SSEHttpError';
     this.status = status;
     this.response = response;
+  }
+
+  static async from(res: Response) {
+    const responseJson = await res.json().catch(() => null);
+    return new SSEHttpError(res.status, responseJson);
   }
 }
 

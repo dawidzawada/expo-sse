@@ -14,11 +14,12 @@ export function createStream(chunks: string[]): ReadableStream<Uint8Array> {
   });
 }
 
-export function mockResponse(status = 200) {
+export function mockResponse(status = 200, body = {}) {
   return {
     ok: status >= 200 && status < 300,
     status,
-    body: {},
+    body,
+    json: () => Promise.resolve(body),
   } as unknown as Response;
 }
 
