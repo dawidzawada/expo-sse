@@ -1,5 +1,12 @@
 
 
+# [1.2.0](https://github.com/dawidzawada/expo-sse/compare/v1.1.0...v1.2.0) (2026-03-24)
+
+
+### Features
+
+* parse response json in SSEHttpError ([cf841cb](https://github.com/dawidzawada/expo-sse/commit/cf841cb3fb4a7a8526369534c650a536c4feed13))
+
 # [1.1.0](https://github.com/dawidzawada/expo-sse/compare/v1.0.0...v1.1.0) (2026-03-19)
 
 
