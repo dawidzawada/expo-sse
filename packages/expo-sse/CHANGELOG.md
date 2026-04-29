@@ -1,5 +1,12 @@
 
 
+## [1.2.1](https://github.com/dawidzawada/expo-sse/compare/v1.2.0...v1.2.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* reconnect on network errors before onOpen completes ([19f9fb3](https://github.com/dawidzawada/expo-sse/commit/19f9fb370b96edfc65ae65ad92ded6152e13f579))
+
 # [1.2.0](https://github.com/dawidzawada/expo-sse/compare/v1.1.0...v1.2.0) (2026-03-24)
 
 
