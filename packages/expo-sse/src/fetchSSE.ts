@@ -76,7 +76,7 @@ export async function fetchSSE(
       headers.set('Last-Event-ID', lastEventId);
     }
 
-    let openCompleted = false;
+    let inOnOpen = false;
 
     try {
       const response = await expoFetch(url, { headers, signal });
@@ -86,9 +86,10 @@ export async function fetchSSE(
       }
 
       if (onOpen) {
+        inOnOpen = true;
         await onOpen(response);
+        inOnOpen = false;
       }
-      openCompleted = true;
 
       let receivedMessage = false;
 
@@ -122,7 +123,7 @@ export async function fetchSSE(
         return;
       }
 
-      if (!openCompleted && !(error instanceof SSEHttpError)) {
+      if (inOnOpen) {
         throw error;
       }
 
