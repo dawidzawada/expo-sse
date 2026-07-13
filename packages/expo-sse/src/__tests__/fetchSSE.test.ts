@@ -1,5 +1,5 @@
 import { fetch as expoFetch } from 'expo/fetch';
-import { SSEHttpError } from '../errors';
+import { SSEHttpError, SSETransportError } from '../errors';
 import { fetchSSE } from '../fetchSSE';
 import { parseSSEStream } from '../parseSSEStream';
 import type { SSEMessage } from '../types';
@@ -140,6 +140,26 @@ describe('fetchSSE', () => {
     const httpError = error as SSEHttpError;
     expect(httpError.status).toBe(500);
     expect(httpError.response).toBe(responseBody);
+  });
+
+  it('surfaces connect transport failures as SSETransportError', async () => {
+    mockFetch.mockRejectedValueOnce(
+      new Error(
+        'fetch failed: java.net.UnknownHostException: Unable to resolve host "api.example.com": No address associated with hostname'
+      )
+    );
+
+    const error = await fetchSSE(TEST_URL, {
+      onMessage: () => {},
+      onError: (e) => {
+        throw e;
+      },
+    }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(SSETransportError);
+    const transportError = error as SSETransportError;
+    expect(transportError.type).toBe('fetch_failed');
+    expect(transportError.kind).toBe('dns');
   });
 
   it('reconnects with default backoff when onError returns undefined', async () => {

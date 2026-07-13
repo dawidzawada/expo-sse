@@ -17,6 +17,7 @@
     "test:watch": "jest --config ../../jest.config.js --watch",
     "test:coverage": "jest --config ../../jest.config.js --coverage",
     "lint": "eslint src/ --ext .ts,.tsx",
+    "check:expo-fetch": "node scripts/check-expo-fetch-assumptions.mjs",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

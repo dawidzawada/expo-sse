@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Check expo/fetch assumptions
+        run: node packages/expo-sse/scripts/check-expo-fetch-assumptions.mjs
+
       - name: Lint
         run: bun run lint
 
