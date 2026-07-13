@@ -134,6 +134,38 @@ Thrown when the internal buffer exceeds `maxBufferSize`.
 | `bufferSize`    | `number` | Current buffer size in bytes. |
 | `maxBufferSize` | `number` | Configured limit in bytes.    |
 
+#### `SSETransportError`
+
+Thrown when the connection fails at the transport layer — before an HTTP response is received (DNS, TCP connect, TLS, or timeout). Occurs when for example device is offline. Passed to `onError` (and rejected from `fetchSSE` when no `onError` is set).
+
+| Property | Type                                                    | Description                              |
+| -------- | ------------------------------------------------------- | ---------------------------------------- |
+| `type`   | `'fetch_failed'`                                        | Originating `expo/fetch` error band.     |
+| `kind`   | `'dns' \| 'connect' \| 'tls' \| 'timeout' \| 'unknown'` | Classified failure category (see below). |
+| `cause`  | `unknown`                                               | The original underlying error.           |
+
+The `kind` lets you triage transport failures by category and priority — for example, silence the expected offline noise (`'dns'`, `'connect'`) while still reporting the ones worth investigating (`'tls'`, `'timeout'`, `'unknown'`):
+
+```ts
+import { fetchSSE, SSETransportError } from '@dawidzawada/expo-sse';
+
+fetchSSE(url, {
+  onMessage: handleMessage,
+  onError: (error) => {
+    if (error instanceof SSETransportError) {
+      if (error.kind === 'dns' || error.kind === 'connect') {
+        return; // offline — reconnect quietly, don't report
+      }
+      reportToSentry(error); // tls / timeout / unknown
+      return;
+    }
+    throw error; // e.g. SSEHttpError — handle separately
+  },
+});
+```
+
+**Platform support.** Classification of `kind` is currently **Android only** — the underlying native error carries a stable signature (the JVM exception class name) that we can categorize reliably. On **iOS**, `expo/fetch` exposes only a localized, device-language error description with no stable machine-readable signature, so `kind` is always `'unknown'` there for now. iOS classification is on the roadmap: as soon as `expo/fetch` surfaces a stable error signal on iOS, it will populate the same `kind` values — no API change required.
+
 ## Example: Connecting and disconnecting
 
 Use an `AbortController` to disconnect. The `onAbort` callback is called when the connection is stopped via the signal.

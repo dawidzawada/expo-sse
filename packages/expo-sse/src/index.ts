@@ -1,7 +1,15 @@
 export { fetchSSE } from './fetchSSE';
 export { parseSSEStream } from './parseSSEStream';
 export { parseSSEBuffer } from './parseSSEBuffer';
-export { SSEHttpError, SSEBufferOverflowError } from './errors';
+export {
+  SSEHttpError,
+  SSEBufferOverflowError,
+  SSETransportError,
+} from './errors';
+export type {
+  SSETransportErrorType,
+  SSETransportErrorKind,
+} from './errors';
 export type {
   SSEMessage,
   SSEParseResult,

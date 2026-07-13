@@ -1,5 +1,5 @@
 import { fetch as expoFetch } from 'expo/fetch';
-import { SSEHttpError } from './errors';
+import { SSEHttpError, SSETransportError } from './errors';
 import { parseSSEStream } from './parseSSEStream';
 import type { FetchSSEOptions } from './types';
 
@@ -127,11 +127,13 @@ export async function fetchSSE(
         throw error;
       }
 
+      const transportError = SSETransportError.from(error) ?? error;
+
       if (!onError) {
-        throw error;
+        throw transportError;
       }
 
-      const result = await onError(error as Error);
+      const result = await onError(transportError as Error);
       let delayMs: number | undefined =
         typeof result === 'number' ? result : undefined;
 
