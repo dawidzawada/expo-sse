@@ -1,5 +1,12 @@
 
 
+# [1.3.0](https://github.com/dawidzawada/expo-sse/compare/v1.2.1...v1.3.0) (2026-07-13)
+
+
+### Features
+
+* implement SSETransportError ([ab33ff7](https://github.com/dawidzawada/expo-sse/commit/ab33ff719c643244369bc21cefa1b1f1f8ba31a4))
+
 ## [1.2.1](https://github.com/dawidzawada/expo-sse/compare/v1.2.0...v1.2.1) (2026-04-29)
 
 
