@@ -6,6 +6,13 @@ SSE (Server-Sent Events) client for Expo apps, built on `expo/fetch` streaming.
 
 - Expo SDK 54+
 
+### Compatibility Table
+
+| Expo SSE version 🧑‍💻 | Expo SDK Version |
+| ------------------- | ---------------- |
+| 1.3.0               | 55+              |
+| 1.0.0+              | 54+              |
+
 ## Installation
 
 ```bash
