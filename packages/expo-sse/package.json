@@ -19,7 +19,8 @@
     "lint": "eslint src/ --ext .ts,.tsx",
     "check:expo-fetch": "node scripts/check-expo-fetch-assumptions.mjs",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist tsconfig*.tsbuildinfo",
+    "prepack": "bun run clean && bun run build"
   },
   "peerDependencies": {
     "expo": ">=54.0.0"
